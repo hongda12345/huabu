@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>画布</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    .box{
+        width: 600px;
+        height: 600px;
+        /* border: 1px solid hotpink; */
+        position: relative;
+    }
+    .eraser{
+        position: absolute;
+        top:0;
+        left: 0;
+        width: 50px;
+        height: 50px;
+        background: rgba(0,0,0,0.3);
+        display: none;
+    }
+    .opacity{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top:0;
+        left: 0;
+        z-index: 999;
+    }
+    canvas{
+        border:1px solid lightskyblue;
+        /*position: relative;*/
+    }
+
+    button{
+        font-size: 16px;
+        padding:5px 20px;
+        background: deepskyblue;
+        border: none;
+    }
+
+
+</style>
+<body>
+    <!--<canvas width="600" height="300">-->
+        <!--&lt;!&ndash; 一般不用css设置 &ndash;&gt;-->
+        <!--hello-->
+    <!--</canvas>-->
+
+    <!--<canvas width="300" height="300">-->
+    <!--</canvas>-->
+
+
+    <div class="box">
+        <canvas width="600" height="600">
+            <!--替换内容 ,不能嵌套其他标签-->
+        </canvas>
+
+        <div class="eraser"></div>
+        <div class="opacity"></div>
+    </div>
+
+
+    <button>撤销</button>
+    <button>橡皮擦</button>
+
+    <script>
+        window.onload=function () {
+           let canvas=document.querySelector('canvas');
+           let ctx=canvas.getContext('2d');
+           //canvas 只是一个画图环境
+//            ctx.fillRect(0,0,300,150); // 填充 （位置 、长宽）
+//            ctx.strokeRect(300,150,300,150); // 描边
+//            ctx.clearRect(10,10,280,130)
+
+            //画三角形
+//            ctx.beginPath();
+//            ctx.moveTo(50,50);
+//            ctx.lineTo(50,150);
+//            ctx.lineTo(150,150);
+//            ctx.lineTo(50,50);
+//            ctx.closePath();
+//
+//
+//            ctx.beginPath();
+//            ctx.moveTo(70,50);
+//            ctx.lineTo(170,50);
+//            ctx.lineTo(170,150);
+//            ctx.fill();
+
+/////////////////////////////////////////////////////////////////
+
+//画圆
+//    ctx.arc(300,150,100,0,Math.PI*2);
+//    ctx.fill();
+// 半圆  上下
+//            ctx.arc(300,150,100,0,Math.PI,false);
+//            ctx.fill();
+//            //默认ctx.stroke();
+//            ctx.arc(300,150,100,0,Math.PI,true);
+//            ctx.fill();
+//左右圆
+//            ctx.arc(300,150,100,Math.PI/2,-Math.PI/2,true);
+//            ctx.fill();
+//            ctx.arc(300,150,100,Math.PI/2,-Math.PI/2);
+//            ctx.fill();
+
+//画笑脸
+//            ctx.arc(300,150,100,0,Math.PI*2);
+//            ctx.closePath();
+//            ctx.stroke();
+//
+//            ctx.beginPath();
+//            ctx.arc(240,130,20,0,Math.PI*2);
+//            ctx.stroke();
+//            ctx.closePath();
+//
+//            ctx.beginPath();
+//            ctx.arc(360,130,20,0,Math.PI*2);
+//            ctx.stroke();
+//            ctx.closePath();
+//
+//            ctx.beginPath();
+//            ctx.arc(300,180,50,0,Math.PI);
+//            ctx.fillStyle='pink';
+//            ctx.fill();
+
+//半圆
+//            for(let i=0;i<4;i++){
+//                for(let j=0;j<3;j++){
+//                   let x=(2*j+1)*30+j*20,
+//                       y=(2*i+1)*30+i*20,
+//                       endRad=Math.PI + Math.PI/2*j;
+//                       dir= i%2 ? true : false
+//
+//                    ctx.beginPath();
+//                    ctx.arc(x,y,30,0,endRad,dir);
+////                    ctx.closePath();
+//                    if(i>1){
+//                        ctx.fill();
+//                    }else{
+//                        ctx.stroke();
+//                    }
+//                }
+//            }
+
+////////////////////////////////////////////////////////////
+
+//任意正多边形
+//            poly(5);
+//            function poly(n) {
+//                ctx.beginPath();
+//                ctx.moveTo(250,150);
+//                let rad=Math.PI*2/n;
+//                for(let i=0;i<n;i++){
+//                    let x=150+100*Math.cos(rad*i);
+//                    let y=150+100*Math.sin(rad*i);
+//                    ctx.lineTo(x,y);
+//                }
+//                ctx.closePath();
+//                ctx.stroke();
+//            }
+//任意正多角形
+//            poly2(80,5);
+//            function poly2(r,n) {
+//                ctx.beginPath();
+//                let rad=Math.PI / n;
+//                ctx.moveTo(150+r ,150);
+//                for(let i=0;i<2*n;i++){
+//                    let r1;
+//                    r1=i%2==0 ? r:r/2;
+//                    let x=150 + r1 * Math.cos(rad*i);
+//                    let y=150 + r1 * Math.sin(rad*i);
+//                    ctx.lineTo(x,y);
+//                }
+//                ctx.closePath();
+//               ctx.stroke();
+//            }
+
+////////////////////////////////////////////////////////
+ 
+ //画线
+            let opacity=document.querySelector('.opacity');
+            let arr=[];
+            opacity.onmousedown=function (e) {
+                let cx=e.offsetX, cy=e.offsetY;
+                opacity.onmousemove=function(e){
+                    let ox=e.offsetX, oy=e.offsetY;
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                    if(arr.length){
+                        ctx.putImageData(arr[arr.length-1],0,0)
+                    }
+                    ctx.beginPath();
+                    ctx.moveTo(cx,cy);
+                    ctx.lineTo(ox,oy);
+                    ctx.stroke();
+                };
+            };
+
+            opacity.onmouseup=function () {
+                arr.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+                opacity.onmousemove=null;
+            };
+
+//点击按钮撤消
+            let btn=document.querySelectorAll('button')[0];
+            btn.onclick=function () {
+                if(!arr.length){
+                    alert('已经撤销完了')
+                }
+                arr.pop();
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                ctx.putImageData(arr[arr.length-1],0,0)
+
+            };
+
+//橡皮擦功能
+            let xpcbtn=document.querySelectorAll('button')[1];
+            let eraser=document.querySelector('.eraser');
+            xpcbtn.onclick=function () {
+                eraser.style.display='block';
+                opacity.onmousemove=function () {
+                    
+                }
+            };
+            xpcbtn.onmoseup=function () {
+                eraser.style.display='none';
+            }
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+//画圆
+//            canvas.onmousedown=function (e) {
+//                let cx=e.offsetX, cy=e.offsetY;
+//                canvas.onmousemove=function(e){
+//                    let ox=e.offsetX, oy=e.offsetY;
+//                    ctx.clearRect(0,0,canvas.width,canvas.height);
+//                    let r=Math.sqrt(Math.pow(cx-ox,2)+Math.pow(cy-oy,2));
+//                    ctx.beginPath();
+//                    ctx.arc(cx,cy,r,0,Math.PI*2);
+//                    ctx.stroke();
+//                };
+//            };
+//
+//            canvas.onmouseup=function () {
+////                canvas.onmousedown=null;
+//                canvas.onmousemove=null;
+//            };
+
+//画多角形
+//            canvas.onmousedown=function (e) {
+//                let cx=e.offsetX, cy=e.offsetY;
+//                canvas.onmousemove=function(e){
+//                    let ox=e.offsetX, oy=e.offsetY;
+//                    ctx.clearRect(0,0,canvas.width,canvas.height);
+//                    let r=Math.sqrt(Math.pow(cx-ox,2)+Math.pow(cy-oy,2));
+//                    poly2(cx,cy,r,5)
+//                };
+//
+//                function poly2(cx,cy,r,n) {
+//                    ctx.beginPath();
+//                    let rad=Math.PI / n;
+//                    ctx.moveTo(cx+r ,cy);
+//                    for(let i=0;i<2*n;i++){
+//                        let r1;
+//                        r1=i%2==0 ? r:r/2;
+//                        let x=cx + r1 * Math.cos(rad*i);
+//                        let y=cy + r1 * Math.sin(rad*i);
+//                        ctx.lineTo(x,y);
+//                    }
+//                    ctx.closePath();
+//                    ctx.stroke();
+//                }
+//            };
+//
+//            canvas.onmouseup=function () {
+////                canvas.onmousedown=null;
+//                canvas.onmousemove=null;
+//            };
+
+//////////////////////////////////////////////////////////////////////////////////
+
+ //用铅笔画
+//            canvas.onmousedown=function (e) {
+//                let cx=e.offsetX, cy=e.offsetY;
+//                ctx.beginPath();
+//                ctx.moveTo(cx,cy);
+//                canvas.onmousemove=function(e){
+//                    let ox=e.offsetX, oy=e.offsetY;
+////                    ctx.clearRect(0,0,canvas.width,canvas.height);
+//                    ctx.lineTo(ox,oy);
+//                    ctx.stroke();
+//                };
+//            };
+//
+//            canvas.onmouseup=function () {
+//                canvas.onmousedown=null;
+//                canvas.onmousemove=null;
+//            };
+
+
+
+
+
+// //获取指定区域内的每像素数据 颜色数据  一个像素 ：R、G、B、A
+//let data=ctx.getImageData(0,0,1000,700);
+//            ctx.clearRect(0,0,1000,700);
+//            ctx.putImageData(data,0,0);     //放回去
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+    </script>
+</body>
+</html>
